@@ -31,6 +31,7 @@ ignore = [
     "FA",
     "COM812",
     "ISC001",
+    "RUF001",
 ]
 
 [tool.ruff.lint.isort]
@@ -46,8 +47,4 @@ lines-after-imports = 2
 exclude_also = ["if typing.TYPE_CHECKING:"]
 
 [dependency-groups]
-dev = [
-    "mypy>=1.14.1",
-    "pytest>=8.3.4",
-    "ruff>=0.9.3",
-]
+dev = ["mypy>=1.14.1", "pytest>=8.3.4", "ruff>=0.9.3"]
