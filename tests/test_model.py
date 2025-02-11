@@ -35,3 +35,10 @@ def test_cannot_add_more_than_14_daytime_or_8_nighttime_hours() -> None:
 
 
 # Тест нельзя добавить 2 записи одного вида часов.
+def test_cannot_add_2_records_same_employment_code() -> None:
+    employment_day = EmploymentDay(TODAY)
+    hours_day = EmploymentHours(EmploymentCode.DAY_SHIFT, 8)
+    another_hours_day = EmploymentHours(EmploymentCode.DAY_SHIFT, 3)
+
+    assert employment_day.can_add_time(hours_day)
+    assert employment_day.can_add_time(another_hours_day) is False
