@@ -37,6 +37,13 @@ class EmploymentDay:
         return sum(employment_hours.hours for employment_hours in self._employment_hours)
 
     def can_add_time(self, employment_hours: EmploymentHours) -> bool:
-        return (employment_hours.code is EmploymentCode.DAY_SHIFT and 0 < employment_hours.hours <= MAX_DAY_HOURS) or (
-            employment_hours.code is EmploymentCode.NIGHT_SHIFT and 0 < employment_hours.hours <= MAX_NIGHT_HOURS
-        )
+        if any(eh.code == employment_hours.code for eh in self._employment_hours):
+            return False
+
+        match employment_hours.code:
+            case EmploymentCode.DAY_SHIFT:
+                return 0 < employment_hours.hours <= MAX_DAY_HOURS
+            case EmploymentCode.NIGHT_SHIFT:
+                return 0 < employment_hours.hours <= MAX_NIGHT_HOURS
+            case _:
+                return False

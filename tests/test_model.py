@@ -41,4 +41,6 @@ def test_cannot_add_2_records_same_employment_code() -> None:
     another_hours_day = EmploymentHours(EmploymentCode.DAY_SHIFT, 3)
 
     assert employment_day.can_add_time(hours_day)
+    employment_day.add_time(hours_day)
+
     assert employment_day.can_add_time(another_hours_day) is False
