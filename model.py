@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import date
 from enum import Enum
 
 
@@ -19,6 +20,13 @@ class EmploymentHours:
 
 
 class EmploymentDay:
-    def __init__(self, date: str, employment_hours: set[EmploymentHours]) -> None:
+    def __init__(self, date: date) -> None:
         self.date = date
-        self.employment_hours = employment_hours
+        self._employment_hours: set[EmploymentHours] = set()
+
+    def add_time(self, employment_hours: EmploymentHours) -> None:
+        self._employment_hours.add(employment_hours)
+
+    @property
+    def total(self) -> float:
+        return sum(employment_hours.hours for employment_hours in self._employment_hours)
