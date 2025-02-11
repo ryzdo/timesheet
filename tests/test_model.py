@@ -24,8 +24,14 @@ def test_for_adding_different_types_of_hours_in_one_day() -> None:
     assert employment_day.total == total
 
 
-# Тест нельзя добавить отрицательные значения часов.
+# Тест нельзя добавить более 14 дневных часов.
+def test_cannot_add_more_than_14_daytime_or_8_nighttime_hours() -> None:
+    employment_day = EmploymentDay(TODAY)
+    hours_day = EmploymentHours(EmploymentCode.DAY_SHIFT, 15)
+    hours_night = EmploymentHours(EmploymentCode.NIGHT_SHIFT, 9)
+
+    assert employment_day.can_add_time(hours_day) is False
+    assert employment_day.can_add_time(hours_night) is False
+
 
 # Тест нельзя добавить 2 записи одного вида часов.
-
-# Тест нельзя добавить суммарно более 22 часов в день.

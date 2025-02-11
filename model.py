@@ -1,6 +1,11 @@
 from dataclasses import dataclass
 from datetime import date
 from enum import Enum
+from typing import Final
+
+
+MAX_DAY_HOURS: Final = 14
+MAX_NIGHT_HOURS: Final = 8
 
 
 class EmploymentCode(Enum):
@@ -30,3 +35,8 @@ class EmploymentDay:
     @property
     def total(self) -> float:
         return sum(employment_hours.hours for employment_hours in self._employment_hours)
+
+    def can_add_time(self, employment_hours: EmploymentHours) -> bool:
+        return (employment_hours.code is EmploymentCode.DAY_SHIFT and 0 < employment_hours.hours <= MAX_DAY_HOURS) or (
+            employment_hours.code is EmploymentCode.NIGHT_SHIFT and 0 < employment_hours.hours <= MAX_NIGHT_HOURS
+        )
