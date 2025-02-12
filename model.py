@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from datetime import date
 from enum import Enum
 from typing import Final
@@ -6,6 +5,10 @@ from typing import Final
 
 MAX_DAY_HOURS: Final = 14
 MAX_NIGHT_HOURS: Final = 8
+
+
+class DuplicateCodeError(Exception):
+    pass
 
 
 class EmploymentCode(Enum):
@@ -18,10 +21,23 @@ class EmploymentCode(Enum):
         self.description = description
 
 
-@dataclass(unsafe_hash=True)
 class EmploymentHours:
-    code: EmploymentCode
-    hours: float
+    def __init__(self, code: EmploymentCode, hours: float) -> None:
+        self.code = code
+        self.hours = hours
+        self._validate_hours()
+
+    def _validate_hours(self) -> None:
+        """Проверяет, что количество часов допустимо для данного кода смены."""
+        match self.code:
+            case EmploymentCode.DAY_SHIFT:
+                if not (0 < self.hours <= MAX_DAY_HOURS):
+                    raise ValueError(f"Invalid hours for DAY_SHIFT: {self.hours}")
+            case EmploymentCode.NIGHT_SHIFT:
+                if not (0 < self.hours <= MAX_NIGHT_HOURS):
+                    raise ValueError(f"Invalid hours for NIGHT_SHIFT: {self.hours}")
+            case _:
+                raise ValueError(f"Unknown employment code: {self.code}")
 
 
 class EmploymentDay:
@@ -30,6 +46,8 @@ class EmploymentDay:
         self._employment_hours: set[EmploymentHours] = set()
 
     def add_time(self, employment_hours: EmploymentHours) -> None:
+        if not self.can_add_time(employment_hours):
+            raise DuplicateCodeError("Cannot add employment hours: duplicate code")
         self._employment_hours.add(employment_hours)
 
     @property
@@ -37,13 +55,4 @@ class EmploymentDay:
         return sum(employment_hours.hours for employment_hours in self._employment_hours)
 
     def can_add_time(self, employment_hours: EmploymentHours) -> bool:
-        if any(eh.code == employment_hours.code for eh in self._employment_hours):
-            return False
-
-        match employment_hours.code:
-            case EmploymentCode.DAY_SHIFT:
-                return 0 < employment_hours.hours <= MAX_DAY_HOURS
-            case EmploymentCode.NIGHT_SHIFT:
-                return 0 < employment_hours.hours <= MAX_NIGHT_HOURS
-            case _:
-                return False
+        return not any(eh.code == employment_hours.code for eh in self._employment_hours)

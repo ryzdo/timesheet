@@ -5,10 +5,25 @@
 # Исключение также возникает при попытке добавления часов, если общая сумма больше 22. Или добавить проверки
 import datetime
 
-from model import EmploymentCode, EmploymentDay, EmploymentHours
+import pytest
+
+from model import DuplicateCodeError, EmploymentCode, EmploymentDay, EmploymentHours
 
 
 TODAY = datetime.datetime.now(tz=datetime.timezone.utc).date()
+
+
+def test_employment_hours_validation() -> None:
+    # Корректные данные
+    EmploymentHours(EmploymentCode.DAY_SHIFT, 8)
+    EmploymentHours(EmploymentCode.NIGHT_SHIFT, 6)
+
+    # Некорректные данные
+    with pytest.raises(ValueError, match="Invalid hours for DAY_SHIFT: 15"):
+        EmploymentHours(EmploymentCode.DAY_SHIFT, 15)
+
+    with pytest.raises(ValueError, match="Invalid hours for NIGHT_SHIFT: -1"):
+        EmploymentHours(EmploymentCode.NIGHT_SHIFT, -1)
 
 
 # Простой тест на добавление разного вида часов в один день.
@@ -24,16 +39,6 @@ def test_for_adding_different_types_of_hours_in_one_day() -> None:
     assert employment_day.total == total
 
 
-# Тест нельзя добавить более 14 дневных часов.
-def test_cannot_add_more_than_14_daytime_or_8_nighttime_hours() -> None:
-    employment_day = EmploymentDay(TODAY)
-    hours_day = EmploymentHours(EmploymentCode.DAY_SHIFT, 15)
-    hours_night = EmploymentHours(EmploymentCode.NIGHT_SHIFT, 9)
-
-    assert employment_day.can_add_time(hours_day) is False
-    assert employment_day.can_add_time(hours_night) is False
-
-
 # Тест нельзя добавить 2 записи одного вида часов.
 def test_cannot_add_2_records_same_employment_code() -> None:
     employment_day = EmploymentDay(TODAY)
@@ -44,3 +49,16 @@ def test_cannot_add_2_records_same_employment_code() -> None:
     employment_day.add_time(hours_day)
 
     assert employment_day.can_add_time(another_hours_day) is False
+
+
+# Тест ошибка при попытке добавить 2 записи одного вида часов.
+def test_duplicate_employment_code_raises_error() -> None:
+    employment_day = EmploymentDay(TODAY)
+
+    hours1 = EmploymentHours(EmploymentCode.DAY_SHIFT, 8)
+    hours2 = EmploymentHours(EmploymentCode.DAY_SHIFT, 4)
+
+    employment_day.add_time(hours1)
+
+    with pytest.raises(DuplicateCodeError, match="Cannot add employment hours: duplicate code"):
+        employment_day.add_time(hours2)
