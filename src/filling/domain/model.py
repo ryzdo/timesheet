@@ -1,6 +1,7 @@
 from datetime import date
-from enum import Enum
 from typing import Final
+
+from .enums import EmploymentCode
 
 
 MAX_DAY_HOURS: Final = 14
@@ -9,16 +10,6 @@ MAX_NIGHT_HOURS: Final = 8
 
 class DuplicateCodeError(Exception):
     pass
-
-
-class EmploymentCode(Enum):
-    DAY_SHIFT = (1, "Я", "Продолжительность работы в дневное время")
-    NIGHT_SHIFT = (2, "Н", "Продолжительность работы в ночное время")
-
-    def __init__(self, numeric_code: int, letter_code: str, description: str) -> None:
-        self.numeric_code = numeric_code
-        self.letter_code = letter_code
-        self.description = description
 
 
 class EmploymentHours:

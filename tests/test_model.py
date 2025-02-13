@@ -7,7 +7,8 @@ import datetime
 
 import pytest
 
-from model import DuplicateCodeError, EmploymentCode, EmploymentDay, EmploymentHours
+from src.filling.domain.enums import EmploymentCode
+from src.filling.domain.model import DuplicateCodeError, EmploymentDay, EmploymentHours
 
 
 TODAY = datetime.datetime.now(tz=datetime.timezone.utc).date()
