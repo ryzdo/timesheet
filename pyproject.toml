@@ -4,9 +4,7 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = [
-    "sqlalchemy>=2.0.38",
-]
+dependencies = ["sqlalchemy>=2.0.38"]
 
 [tool.mypy]
 warn_unused_ignores = true
@@ -43,7 +41,7 @@ known-local-folder = []
 lines-after-imports = 2
 
 [tool.ruff.lint.extend-per-file-ignores]
-"tests/*.py" = ["S101", "S311"]
+"tests/*.py" = ["S101", "S311", "SLF001"]
 
 [tool.coverage.report]
 exclude_also = ["if typing.TYPE_CHECKING:"]

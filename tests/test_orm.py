@@ -1,22 +1,10 @@
-from collections.abc import Generator
 from datetime import datetime
 
-import pytest
-from sqlalchemy import create_engine, select, text
-from sqlalchemy.orm import Session, clear_mappers, sessionmaker
+from sqlalchemy import select, text
+from sqlalchemy.orm import Session
 
-from src.filling.adapters.orm import mapper_registry, start_mappers
 from src.filling.domain import model
 from src.filling.domain.enums import EmploymentCode
-
-
-@pytest.fixture
-def session() -> Generator[Session]:
-    engine = create_engine("sqlite:///:memory:")
-    mapper_registry.metadata.create_all(engine)
-    start_mappers()
-    yield sessionmaker(bind=engine)()
-    clear_mappers()
 
 
 def test_saving_work_day(session: Session) -> None:
