@@ -12,38 +12,41 @@ class DuplicateCodeError(Exception):
     pass
 
 
-class EmploymentHours:
+class InvalidShiftHoursError(Exception):
+    pass
+
+
+class WorkTime:
     def __init__(self, code: EmploymentCode, hours: float) -> None:
         self.code = code
         self.hours = hours
-        self._validate_hours()
+        self._validate_time()
 
-    def _validate_hours(self) -> None:
-        """Проверяет, что количество часов допустимо для данного кода смены."""
+    def _validate_time(self) -> None:
         match self.code:
-            case EmploymentCode.DAY_SHIFT:
+            case EmploymentCode.DAY_HOUR:
                 if not (0 < self.hours <= MAX_DAY_HOURS):
-                    raise ValueError(f"Invalid hours for DAY_SHIFT: {self.hours}")
-            case EmploymentCode.NIGHT_SHIFT:
+                    raise InvalidShiftHoursError(f"Invalid hours for {self.code._name_}: {self.hours}")
+            case EmploymentCode.NIGHT_HOUR:
                 if not (0 < self.hours <= MAX_NIGHT_HOURS):
-                    raise ValueError(f"Invalid hours for NIGHT_SHIFT: {self.hours}")
+                    raise InvalidShiftHoursError(f"Invalid hours for {self.code._name_}: {self.hours}")
             case _:
-                raise ValueError(f"Unknown employment code: {self.code}")
+                raise InvalidShiftHoursError(f"Unknown employment code: {self.code}")
 
 
-class EmploymentDay:
+class WorkDay:
     def __init__(self, date: date) -> None:
         self.date = date
-        self._employment_hours: set[EmploymentHours] = set()
+        self._shift: set[WorkTime] = set()
 
-    def add_time(self, employment_hours: EmploymentHours) -> None:
-        if not self.can_add_time(employment_hours):
-            raise DuplicateCodeError("Cannot add employment hours: duplicate code")
-        self._employment_hours.add(employment_hours)
+    def add_work_time(self, work_time: WorkTime) -> None:
+        if not self.is_code_unique(work_time):
+            raise DuplicateCodeError("Cannot add work time: duplicate code")
+        self._shift.add(work_time)
 
     @property
-    def total(self) -> float:
-        return sum(employment_hours.hours for employment_hours in self._employment_hours)
+    def total_hours(self) -> float:
+        return sum(shift.hours for shift in self._shift)
 
-    def can_add_time(self, employment_hours: EmploymentHours) -> bool:
-        return not any(eh.code == employment_hours.code for eh in self._employment_hours)
+    def is_code_unique(self, work_time: WorkTime) -> bool:
+        return not any(shift.code == work_time.code for shift in self._shift)
