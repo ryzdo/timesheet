@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from datetime import date
 from typing import Final
 
@@ -16,10 +17,15 @@ class InvalidShiftHoursError(Exception):
     pass
 
 
+@dataclass(unsafe_hash=True)
 class WorkTime:
-    def __init__(self, code: EmploymentCode, hours: float) -> None:
-        self.code = code
-        self.hours = hours
+    code: EmploymentCode
+    hours: float
+
+    def __repr__(self) -> str:
+        return f"WorkTime {self.code.name}: {self.hours}"
+
+    def __post_init__(self) -> None:
         self._validate_time()
 
     def _validate_time(self) -> None:
@@ -38,6 +44,9 @@ class WorkDay:
     def __init__(self, date: date) -> None:
         self.date = date
         self._shift: set[WorkTime] = set()
+
+    def __repr__(self) -> str:
+        return f"WorkDay {self.date}"
 
     def add_work_time(self, work_time: WorkTime) -> None:
         if not self.is_code_unique(work_time):
