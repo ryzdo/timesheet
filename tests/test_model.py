@@ -14,7 +14,7 @@ from src.filling.domain.model import DuplicateCodeError, InvalidShiftHoursError,
 TODAY = datetime.datetime.now(tz=datetime.timezone.utc).date()
 
 
-def test_employment_hours_validation() -> None:
+def test_work_time_validation() -> None:
     # Корректные данные
     WorkTime(EmploymentCode.DAY_HOUR, 8)
     WorkTime(EmploymentCode.NIGHT_HOUR, 6)
