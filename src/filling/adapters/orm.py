@@ -11,7 +11,7 @@ work_times = Table(
     "work_times",
     mapper_registry.metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
-    Column("work_day_id", ForeignKey("work_days.id"), nullable=False),
+    Column("work_day_id", ForeignKey("work_days.id", ondelete="CASCADE"), nullable=False),
     Column("code", Enum(EmploymentCode), nullable=False),
     Column("hours", Float),
 )

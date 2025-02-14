@@ -48,6 +48,11 @@ class WorkDay:
     def __repr__(self) -> str:
         return f"WorkDay {self.date}"
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, WorkDay):
+            return False
+        return other.date == self.date
+
     def add_work_time(self, work_time: WorkTime) -> None:
         if not self.is_code_unique(work_time):
             raise DuplicateCodeError("Cannot add work time: duplicate code")
