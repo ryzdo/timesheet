@@ -1,0 +1,9 @@
+services:
+
+  postgres:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=timesheet
+      - POSTGRES_PASSWORD=Qwe123
+    ports:
+      - "54321:5432"
