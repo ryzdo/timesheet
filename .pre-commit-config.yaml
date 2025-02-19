@@ -26,4 +26,4 @@ repos:
     hooks:
       - id: mypy
         args: ["--config-file", "./pyproject.toml"]
-        additional_dependencies: [pytest, SQLAlchemy]
+        additional_dependencies: [pytest, advanced_alchemy]

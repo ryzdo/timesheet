@@ -23,6 +23,15 @@ def insert_work_day(session: Session, date: str) -> int:
     return work_day_id
 
 
+class MyExceptionError(Exception):
+    pass
+
+
+def insert_work_day_with_exception(session: Session, date: str) -> int:
+    insert_work_day(session, date)
+    raise MyExceptionError
+
+
 def get_added_work_times(session: Session, date: str) -> Sequence[str]:
     [wtimes] = session.execute(
         text("SELECT code, hours FROM work_times JOIN work_days AS wd ON work_day_id = wd.id WHERE date=:date"),
@@ -38,7 +47,7 @@ def test_uow_can_retrieve(session_factory: sessionmaker[Session]) -> None:
 
     uow = unit_of_work.SqlAlchemyUnitOfWork(session_factory)
     with uow:
-        wday = uow.work_days.get(date=datetime.fromisoformat("2025-01-31").date())
+        wday = uow.work_days.get_one(date=datetime.fromisoformat("2025-01-31").date())
         wtime = model.WorkTime(EmploymentCode.DAY_HOUR, 3)
         assert wday is not None
         wday.add_work_time(wtime)
@@ -58,13 +67,10 @@ def test_rolls_back_uncommitted_work_by_default(session_factory: sessionmaker[Se
 
 
 def test_rolls_back_on_error(session_factory: sessionmaker[Session]) -> None:
-    class MyExceptionError(Exception):
-        pass
-
     uow = unit_of_work.SqlAlchemyUnitOfWork(session_factory)
     with pytest.raises(MyExceptionError), uow:
-        insert_work_day(uow.session, "2025-01-31")
-        raise MyExceptionError
+        insert_work_day_with_exception(uow.session, "2025-01-31")
+
     new_session = session_factory()
     rows = list(new_session.execute(text('SELECT * FROM "work_days"')))
     assert rows == []

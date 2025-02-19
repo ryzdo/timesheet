@@ -1,10 +1,12 @@
 import abc
 
+from advanced_alchemy.repository import SQLAlchemySyncRepository
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from src.filling import config
 from src.filling.adapters import repository
+from src.filling.domain import model as m
 
 
 DEFAULT_SESSION_FACTORY = sessionmaker(
@@ -15,7 +17,7 @@ DEFAULT_SESSION_FACTORY = sessionmaker(
 
 
 class AbstractUnitOfWork(abc.ABC):
-    work_days: repository.AbstractRepository
+    work_days: SQLAlchemySyncRepository[m.WorkDay]  # type: ignore[type-var]
 
     def __enter__(self) -> "AbstractUnitOfWork":
         return self
@@ -38,7 +40,7 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
 
     def __enter__(self) -> "AbstractUnitOfWork":
         self.session = self.session_factory()
-        self.work_days = repository.SqlAlchemyRepository(self.session)
+        self.work_days = repository.SqlAlchemyRepository(session=self.session)
         return super().__enter__()
 
     def __exit__(self, *args: object) -> None:

@@ -11,7 +11,7 @@ from src.filling.domain.enums import EmploymentCode
 def test_repository_can_save_a_work_day(session: Session) -> None:
     wday = model.WorkDay(datetime.fromisoformat("2025-01-31"))
 
-    repo = repository.SqlAlchemyRepository(session)
+    repo = repository.SqlAlchemyRepository(session=session)
     repo.add(wday)
     session.commit()
 
@@ -45,8 +45,8 @@ def test_repository_can_retrieve_a_work_day_with_shift(session: Session) -> None
     insert_work_time(session, wday_id, EmploymentCode.DAY_HOUR, 3.0)
     insert_work_time(session, wday_id, EmploymentCode.NIGHT_HOUR, 8.0)
 
-    repo = repository.SqlAlchemyRepository(session)
-    retrieved = repo.get(datetime.fromisoformat("2025-01-30").date())
+    repo = repository.SqlAlchemyRepository(session=session)
+    retrieved = repo.get_one(date=datetime.fromisoformat("2025-01-30").date())
 
     expected = model.WorkDay(datetime.fromisoformat("2025-01-30").date())
     assert retrieved == expected

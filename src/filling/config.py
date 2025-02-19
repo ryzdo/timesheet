@@ -7,3 +7,9 @@ def get_postgres_uri() -> str:
     password = os.environ.get("DB_PASSWORD", "Qwe123")
     user, db_name = "timesheet", "timesheet"
     return f"postgresql+psycopg://{user}:{password}@{host}:{port}/{db_name}"
+
+
+def get_api_url() -> str:
+    host = os.environ.get("API_HOST", "localhost")
+    port = 5005 if host == "localhost" else 80
+    return f"http://{host}:{port}"
