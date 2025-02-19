@@ -4,10 +4,7 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = [
-    "psycopg[binary]>=3.2.4",
-    "sqlalchemy>=2.0.38",
-]
+dependencies = ["litestar[sqlalchemy]>=2.14.0", "psycopg[binary]>=3.2.4"]
 
 [tool.mypy]
 warn_unused_ignores = true
@@ -50,4 +47,4 @@ lines-after-imports = 2
 exclude_also = ["if typing.TYPE_CHECKING:"]
 
 [dependency-groups]
-dev = ["mypy>=1.14.1", "pytest>=8.3.4", "ruff>=0.9.3"]
+dev = ["pre-commit>=4.1.0", "mypy>=1.14.1", "pytest>=8.3.4", "ruff>=0.9.3"]
