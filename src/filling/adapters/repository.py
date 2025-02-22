@@ -10,7 +10,7 @@ from src.filling.domain import model
 
 class AbstractRepository(abc.ABC):
     @abc.abstractmethod
-    def add(self, batch: model.WorkDay) -> None:
+    def add(self, work_day: model.WorkDay) -> None:
         raise NotImplementedError
 
     @abc.abstractmethod
