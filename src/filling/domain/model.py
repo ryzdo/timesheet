@@ -48,6 +48,9 @@ class WorkDay:
     def __repr__(self) -> str:
         return f"WorkDay {self.date}"
 
+    def __hash__(self) -> int:
+        return hash(self.date)
+
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, WorkDay):
             return False
