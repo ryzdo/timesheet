@@ -33,7 +33,7 @@ class AbstractUnitOfWork(abc.ABC):
 
 
 class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
-    def __init__(self, session_factory: sessionmaker[Session]) -> None:
+    def __init__(self, session_factory: sessionmaker[Session] = DEFAULT_SESSION_FACTORY) -> None:
         self.session_factory = session_factory
 
     def __enter__(self) -> "AbstractUnitOfWork":
