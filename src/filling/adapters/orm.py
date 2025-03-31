@@ -25,15 +25,16 @@ work_days = Table(
 
 
 def start_mappers() -> None:
-    work_time_mapper = mapper_registry.map_imperatively(model.WorkTime, work_times)
+    if not mapper_registry.mappers:
+        work_time_mapper = mapper_registry.map_imperatively(model.WorkTime, work_times)
 
-    mapper_registry.map_imperatively(
-        model.WorkDay,
-        work_days,
-        properties={
-            "_shift": relationship(
-                work_time_mapper,
-                collection_class=set,
-            )
-        },
-    )
+        mapper_registry.map_imperatively(
+            model.WorkDay,
+            work_days,
+            properties={
+                "_shift": relationship(
+                    work_time_mapper,
+                    collection_class=set,
+                )
+            },
+        )

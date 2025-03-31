@@ -7,6 +7,11 @@ from sqlalchemy.orm import Session, clear_mappers, sessionmaker
 from src.filling.adapters.orm import mapper_registry, start_mappers
 
 
+pytest_plugins = [
+    "pytest_databases.docker.postgres",
+]
+
+
 @pytest.fixture
 def session(session_factory: sessionmaker[Session]) -> Session:
     return session_factory()
