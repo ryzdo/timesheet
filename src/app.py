@@ -1,6 +1,7 @@
 from typing import Any
 
 from litestar import Litestar, MediaType, get
+from litestar.logging import LoggingConfig
 from litestar.plugins.sqlalchemy import SQLAlchemyAsyncConfig, SQLAlchemyPlugin
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,6 +20,7 @@ def serialize(wd: model.WorkDay) -> WorkDayType:
 
 @get(path="/health-check", media_type=MediaType.TEXT)
 async def health_check() -> str:
+    logger.info("Это info сообщение")
     return "healthy"
 
 
@@ -37,7 +39,14 @@ db_config = SQLAlchemyAsyncConfig(
     before_send_handler="autocommit",
 )
 
+logging_config = LoggingConfig(
+    log_exceptions="always",
+)
+logger = logging_config.configure()()
 
 app = Litestar(
-    route_handlers=[health_check, get_list_work_days], plugins=[SQLAlchemyPlugin(db_config)], on_startup=[start_mappers]
+    route_handlers=[health_check, get_list_work_days],
+    plugins=[SQLAlchemyPlugin(db_config)],
+    on_startup=[start_mappers],
+    logging_config=logging_config,
 )
