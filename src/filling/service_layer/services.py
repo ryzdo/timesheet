@@ -1,4 +1,9 @@
+from collections.abc import AsyncGenerator
 from datetime import date
+
+from advanced_alchemy.repository import SQLAlchemyAsyncRepository
+from advanced_alchemy.service import SQLAlchemyAsyncRepositoryService
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.filling.domain import model
 from src.filling.domain.enums import EmploymentCode
@@ -30,3 +35,15 @@ def add_work_time(
             raise InvalidDateError("Invalid date")
         wday.add_work_time(model.WorkTime(code, hours))
         uow.commit()
+
+
+class WorkDayService(SQLAlchemyAsyncRepositoryService[model.WorkDay]):  # type: ignore[type-var]
+    class WorkDayRepository(SQLAlchemyAsyncRepository[model.WorkDay]):  # type: ignore[type-var]
+        model_type = model.WorkDay
+
+    repository_type = WorkDayRepository
+
+
+async def provide_work_days_service(db_session: AsyncSession) -> AsyncGenerator[WorkDayService]:
+    async with WorkDayService.new(session=db_session) as service:
+        yield service
