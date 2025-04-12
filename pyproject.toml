@@ -5,8 +5,8 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "litestar[standard, sqlalchemy]>=2.14.0",
-    "psycopg[binary]>=3.2.4",
+    "litestar[standard, sqlalchemy]>=2.15.2",
+    "psycopg[binary]>=3.2.6",
 ]
 
 [tool.mypy]
@@ -51,11 +51,12 @@ exclude_also = ["if typing.TYPE_CHECKING:"]
 
 [dependency-groups]
 dev = [
-    "pre-commit>=4.1.0",
-    "mypy>=1.14.1",
-    "pytest>=8.3.4",
-    "ruff>=0.9.3",
-    "pytest-databases[postgres]>=0.12.0",
+    "pre-commit>=4.2.0",
+    "mypy>=1.15.0",
+    "pytest>=8.3.5",
+    "ruff>=0.11.5",
+    "pytest-databases[postgres]>=0.12.2",
+    "pytest-mock>=3.14.0",
 ]
 
 [tool.bandit]
