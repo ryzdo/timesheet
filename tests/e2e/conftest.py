@@ -56,11 +56,6 @@ def _patch_db(
     monkeypatch.setattr(db_config, "engine_instance", engine)
 
 
-@pytest.fixture(scope="session")
-def anyio_backend() -> str:
-    return "asyncio"
-
-
 @pytest.fixture
 async def test_client() -> AsyncIterator[AsyncTestClient[Litestar]]:
     async with AsyncTestClient(app=app) as client:
