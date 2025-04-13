@@ -5,6 +5,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 from advanced_alchemy.exceptions import RepositoryError
+from advanced_alchemy.repository.memory import SQLAlchemyAsyncMockRepository
 from pytest_mock import MockerFixture
 from sqlalchemy import Engine
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -87,22 +88,24 @@ def test_add_work_time_errors_for_invalid_date() -> None:
         services.add_work_time(datetime.fromisoformat("2025-01-31").date(), EmploymentCode.DAY_HOUR, VALID_HOURS, uow)
 
 
+@pytest.fixture
+async def mock_session(mocker: MockerFixture) -> AsyncMock:
+    mock_engine = mocker.MagicMock(spec=Engine)
+    mock_engine.dialect = mocker.MagicMock()
+
+    session = mocker.AsyncMock(spec=AsyncSession)
+    session.bind = mock_engine
+    session.execute.return_value = mocker.AsyncMock(scalar_one_or_none=mocker.AsyncMock(return_value=None))
+    return cast("AsyncMock", session)
+
+
+@pytest.fixture
+async def workday_service(mock_session: AsyncSession) -> AsyncGenerator[WorkDayService]:
+    async with WorkDayService.new(session=mock_session) as service:
+        yield service
+
+
 class TestWorkDayServiceMock:
-    @pytest.fixture
-    async def mock_session(self, mocker: MockerFixture) -> AsyncMock:
-        mock_engine = mocker.MagicMock(spec=Engine)
-        mock_engine.dialect = mocker.MagicMock()
-
-        session = mocker.AsyncMock(spec=AsyncSession)
-        session.bind = mock_engine
-        session.execute.return_value = mocker.AsyncMock(scalar_one_or_none=mocker.AsyncMock(return_value=None))
-        return cast("AsyncMock", session)
-
-    @pytest.fixture
-    async def workday_service(self, mock_session: AsyncSession) -> AsyncGenerator[WorkDayService]:
-        async with WorkDayService.new(session=mock_session) as service:
-            yield service
-
     async def test_create_workday(
         self,
         workday_service: WorkDayService,
@@ -145,3 +148,51 @@ class TestWorkDayServiceMock:
             await workday_service.create(new_workday, auto_commit=True)
         workday_service.repository.session.add.assert_not_awaited()
         workday_service.repository.session.commit.assert_not_awaited()
+
+
+class TestWorkDayServicePatchRepository:
+    @pytest.fixture(scope="class")
+    async def mock_repository(self) -> type[SQLAlchemyAsyncMockRepository[WorkDay]]:  # type: ignore[type-var]
+        class Repo(SQLAlchemyAsyncMockRepository[WorkDay]):  # type: ignore[type-var]
+            model_type = WorkDay
+
+        return Repo
+
+    @pytest.fixture(autouse=True)
+    async def _patch_repo(
+        self,
+        mock_repository: SQLAlchemyAsyncMockRepository[WorkDay],  # type: ignore[type-var]
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.setattr(WorkDayService, "repository_type", mock_repository)
+
+    async def test_create_workday(
+        self,
+        workday_service: WorkDayService,
+    ) -> None:
+        test_date = date(2025, 1, 1)
+        test_work_day = WorkDay(date=test_date)
+
+        created = await workday_service.create(test_work_day, auto_commit=True)
+
+        assert created == test_work_day
+        assert created.date == test_date
+        assert await workday_service.get_one_or_none(date=test_date) == test_work_day
+
+    @pytest.mark.skip(reason="Не работает: SQLAlchemyAsyncMockRepository не создаёт новых объектов")
+    async def test_create_duplicate_workday_fails(
+        self,
+        workday_service: WorkDayService,
+    ) -> None:
+        list_wd = await workday_service.list()
+        assert len(list_wd) == 0
+
+        test_date = date(2025, 1, 30)
+        existing_workday = WorkDay(date=test_date)
+        new_workday = WorkDay(date=test_date)
+
+        wd = await workday_service.get_one_or_none(date=test_date)
+
+        assert wd == existing_workday
+        with pytest.raises(RepositoryError):
+            await workday_service.create(new_workday)
