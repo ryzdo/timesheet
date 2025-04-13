@@ -20,7 +20,7 @@ work_days = Table(
     "work_days",
     mapper_registry.metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
-    Column("date", Date, nullable=False),
+    Column("date", Date, nullable=False, unique=True),
 )
 
 

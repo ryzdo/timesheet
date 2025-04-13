@@ -4,6 +4,7 @@ from typing import cast
 from unittest.mock import AsyncMock
 
 import pytest
+from advanced_alchemy.exceptions import RepositoryError
 from pytest_mock import MockerFixture
 from sqlalchemy import Engine
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -128,3 +129,19 @@ class TestWorkDayServiceMock:
         workday_service.repository.session.add.assert_called_once()
         workday_service.repository.session.commit.assert_not_called()
         workday_service.repository.session.flush.assert_called_once()
+
+    @pytest.mark.skip(reason="Не работает в рамках тестов")
+    async def test_create_duplicate_workday_fails(
+        self,
+        workday_service: WorkDayService,
+    ) -> None:
+        test_date = date(2023, 1, 1)
+        existing_workday = WorkDay(date=test_date)
+        new_workday = WorkDay(date=test_date)
+
+        await workday_service.create(existing_workday, auto_commit=True)
+
+        with pytest.raises(RepositoryError):
+            await workday_service.create(new_workday, auto_commit=True)
+        workday_service.repository.session.add.assert_not_awaited()
+        workday_service.repository.session.commit.assert_not_awaited()
